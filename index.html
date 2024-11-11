@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>3D Heart Animation with Three.js</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+        position: relative;
+      }
+      canvas {
+        display: block;
+        z-index: -1;
+      }
+      .label-place {
+        position: absolute;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        bottom: 25px;
+        color: white;
+        font-size: 36px;
+        font-family: "Roboto", sans-serif;
+        font-weight: 700;
+        opacity: 0;
+        animation: fadeText 0.8s ease-in-out infinite;
+      }
+      @keyframes fadeText {
+        0%,
+        100% {
+          opacity: 0;
+        }
+        50% {
+          opacity: 1;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="label-place"></div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+      // Инициализация сцены, камеры и рендера
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(
+        75,
+        window.innerWidth / window.innerHeight,
+        0.1,
+        1000
+      );
+      const renderer = new THREE.WebGLRenderer();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      document.body.appendChild(renderer.domElement);
+
+      // Функция для создания 3D-сердца
+      function createHeartGeometry() {
+        const geometry = new THREE.BufferGeometry();
+        const positions = [];
+        for (let i = 0; i < 1000; i++) {
+          let t = (i / 1000) * (Math.PI * 2);
+          let x = 16 * Math.sin(t) ** 3;
+          let y =
+            13 * Math.cos(t) -
+            5 * Math.cos(2 * t) -
+            2 * Math.cos(3 * t) -
+            Math.cos(4 * t);
+          let z = Math.random() * 10 - 5;
+          positions.push(x, y, z);
+        }
+        geometry.setAttribute(
+          "position",
+          new THREE.Float32BufferAttribute(positions, 3)
+        );
+        return geometry;
+      }
+
+      // Функция для создания материала
+      function createMaterial() {
+        return new THREE.PointsMaterial({
+          color: 0xff0000,
+          size: 0.1,
+          emissive: 0xff0000,
+          transparent: true,
+          opacity: 0.8,
+        });
+      }
+
+      // Создание 3D-сердца
+      function createHeart() {
+        const geometry = createHeartGeometry();
+        const material = createMaterial();
+        const points = new THREE.Points(geometry, material);
+        scene.add(points);
+        return points;
+      }
+
+      // Анимация 3D-сцены
+      function animate() {
+        requestAnimationFrame(animate);
+        points.rotation.x += 0.001;
+        points.rotation.y += 0.001;
+        renderer.render(scene, camera);
+      }
+
+      // Подключение адаптивности экрана
+      function onWindowResize() {
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+      }
+
+      // Обработчик для случайного текста
+      function showRandomPickupLine() {
+        const pickupLines = [
+          "Ты как Google? Потому что я всегда нахожу в тебе всё, что искал.",
+          "Ты случайно не электрический прибор? Потому что ты заставляешь моё сердце биться быстрее.",
+          "Если бы ты была котом, я бы был твоим хвостом.",
+          "Ты как Wi-Fi? Потому что я чувствую связь.",
+          "Ты что, из Вики? Потому что я нашел тебя в разделе 'Самое лучшее'.",
+          "Если бы ты была мороженым, я бы тебя съел прямо с конуса.",
+          "Ты как слепая кнопка на клавиатуре — каждый раз ты просто мой 'Enter'.",
+          "Ты мой зарядный кабель. Без тебя я просто разряжаюсь.",
+          "Ты, наверное, волшебница, потому что каждый раз, когда я тебя вижу, мир становится лучше.",
+          "Ты — как рентген. Ты видишь моё сердце насквозь.",
+          "Я как математик, а ты как решение — ты всё, что я искал.",
+          "Ты как перезагрузка для моего дня — после встречи с тобой всё становится лучше.",
+        ];
+
+        const randomNumber = Math.floor(Math.random() * pickupLines.length);
+        const prompt = `${pickupLines[randomNumber]} Надеюсь я тебя не обидел) Это сообщение для самой любимой и красивой девочки Карины Гордеевой :)`;
+
+        let wordCount = 0;
+        const words = prompt.split(" ");
+        const labelPlace = document.querySelector(".label-place");
+
+        const interval = setInterval(() => {
+          labelPlace.textContent = words[wordCount];
+          wordCount += 1;
+          if (wordCount === words.length) {
+            setTimeout(() => {
+              labelPlace.textContent = "";
+            }, 2400);
+            clearInterval(interval);
+          }
+        }, 800);
+      }
+
+      // Основной код
+      const points = createHeart();
+      camera.position.z = 30;
+      window.addEventListener("resize", onWindowResize);
+      animate();
+      showRandomPickupLine();
+    </script>
+  </body>
+</html>
